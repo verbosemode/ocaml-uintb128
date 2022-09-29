@@ -1,0 +1,17 @@
+(lang dune 3.0)
+(name uintb128)
+(generate_opam_files true)
+(source (github verbosemode/uintb128))
+(authors "Jochen Bartl <jochen@verbosemo.de>")
+(maintainers "Jochen Bartl <jochen@verbosemo.de>")
+(license ISC)
+(documentation "https://verbosemode.github.io/uintb128/")
+(package
+ (name uintb128)
+ (synopsis "unsigned Bytes.t based 128 bit integer library")
+ (description "unsigned Bytes.t based 128 bit integer library")
+ (depends
+  (ocaml (>= 4.08.0))
+  (alcotest :with-test)
+  (mtime :with-test)
+  (odoc :with-doc)))
