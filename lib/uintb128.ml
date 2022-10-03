@@ -119,16 +119,10 @@ let lognot x =
    up to bit poisition n.
 
    [n] has to be within the range of 1 and 8.
-
-   TODO there must be an easier way :-)
 *)
 let make_lsb_bitmask n =
-  if n <= 0 || n > 8 then invalid_arg "out of bounds"
-  else
-    let rec aux n' =
-      if n' = 0. then 1. else Float.pow 2. n' +. aux (n' -. 1.)
-    in
-    int_of_float @@ aux (float_of_int (n - 1))
+  if n <= 0 || n > 8 then invalid_arg "out of bounds";
+  1 lsl n - 1
 
 (* Extract the value, starting form the LSB up to bit position [n] *)
 let get_lsbits n x =
