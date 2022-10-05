@@ -190,3 +190,47 @@ let shift_right n x =
         done);
       b
   | _ -> raise (Invalid_argument "n must be >= 0 && <= 128")
+
+let of_int64 (a, b) =
+  let b'= zero () in
+  Bytes.set_int64_be b' 0 a;
+  Bytes.set_int64_be b' 8 b;
+  b'
+
+let to_int64 b = (Bytes.get_int64_be b 0, Bytes.get_int64_be b 8)
+
+let of_int32 (a, b, c, d) =
+  let b'= zero () in
+  Bytes.set_int32_be b' 0 a;
+  Bytes.set_int32_be b' 4 b;
+  Bytes.set_int32_be b' 8 c;
+  Bytes.set_int32_be b' 12 d;
+  b'
+
+let to_int32 b =
+  (Bytes.get_int32_be b 0,
+  Bytes.get_int32_be b 4,
+  Bytes.get_int32_be b 8,
+  Bytes.get_int32_be b 12)
+
+let of_int16 (a, b, c, d, e, f, g, h) =
+  let b'= zero () in
+  Bytes.set_uint16_be b' 0 a;
+  Bytes.set_uint16_be b' 2 b;
+  Bytes.set_uint16_be b' 4 c;
+  Bytes.set_uint16_be b' 6 d;
+  Bytes.set_uint16_be b' 8 e;
+  Bytes.set_uint16_be b' 10 f;
+  Bytes.set_uint16_be b' 12 g;
+  Bytes.set_uint16_be b' 14 h;
+  b'
+
+let to_int16 b =
+  (Bytes.get_uint16_be b 0,
+  Bytes.get_uint16_be b 2,
+  Bytes.get_uint16_be b 4,
+  Bytes.get_uint16_be b 6,
+  Bytes.get_uint16_be b 8,
+  Bytes.get_uint16_be b 10,
+  Bytes.get_uint16_be b 12,
+  Bytes.get_uint16_be b 14)
