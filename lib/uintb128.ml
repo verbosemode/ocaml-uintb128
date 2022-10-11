@@ -50,7 +50,7 @@ let of_string s = try Some (of_string_exn s) with Invalid_argument _ -> None
 
 (* TODO
    - use Bytes.copy for thread-safety??
-   - ommit leading zeroes by using for upto
+   - optionally ommit leading zeroes by using for upto
 *)
 let to_string b =
   let l = ref [] in
@@ -113,21 +113,10 @@ let lognot x =
   Bytes.iteri (fun i _ -> Bytes.set_uint8 b i (lnot (Bytes.get_uint8 x i))) x;
   b
 
-(* add Byte.t for low-level bit fiddling? *)
-
-(* Make a sum of all bits set, starting from the least significant bit (LSB)
-   up to bit poisition n.
-
-   [n] has to be within the range of 1 and 8.
-*)
-let make_lsb_bitmask n =
-  if n <= 0 || n > 8 then invalid_arg "out of bounds";
-  1 lsl n - 1
-
 (* Extract the value, starting form the LSB up to bit position [n] *)
 let get_lsbits n x =
-  assert (n > 0 || n <= 8);
-  x land make_lsb_bitmask n
+  if n <= 0 || n > 8 then invalid_arg "out of bounds";
+  x land (1 lsl n - 1)
 
 let set_bit i x =
   assert (i >= 0 && i <= 7);
