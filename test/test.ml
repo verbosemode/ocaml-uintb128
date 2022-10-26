@@ -50,28 +50,23 @@ let test_lognot () =
   let d2 = Uintb128.v "fffffffffffffffffffffffffffffffe" in
   Alcotest.(check uintb128) "lognot inverts bits" d2 (Uintb128.lognot d1)
 
-(* TODO DRY Use a List with tuples for test parameters *)
 let test_shift_right () =
-  let d1 = Uintb128.v "00000000000000000000000000000100" in
-  let d2 = Uintb128.v "00000000000000000000000000000001" in
-  Alcotest.(check uintb128) "shift right by 8" d2 (Uintb128.shift_right 8 d1);
-  let d1 = Uintb128.v "f0000000000000000000000000000000" in
-  let d2 = Uintb128.v "78000000000000000000000000000000" in
-  Alcotest.(check uintb128) "shift right by 1" d2 (Uintb128.shift_right 1 d1);
-  let d1 = Uintb128.v "f0000000000000000000000000000000" in
-  let d2 = Uintb128.v "3c000000000000000000000000000000" in
-  Alcotest.(check uintb128) "shift right by 2" d2 (Uintb128.shift_right 2 d1);
-  let d1 = Uintb128.v "f0000000000000000000000000000000" in
-  let d2 = Uintb128.v "00780000000000000000000000000000" in
-  Alcotest.(check uintb128) "shift right by 9" d2 (Uintb128.shift_right 9 d1);
-  let d1 = Uintb128.v "01000000000000000000000000000000" in
-  let d2 = Uintb128.v "00000000000000000100000000000000" in
-  Alcotest.(check uintb128) "shift right by 64" d2 (Uintb128.shift_right 64 d1);
-  let d1 = Uintb128.v "80000000000000000000000000000000" in
-  let d2 = Uintb128.v "00000000000000000000000000000001" in
-  Alcotest.(check uintb128)
-    "shift right by 127" d2
-    (Uintb128.shift_right 127 d1)
+  (* (bit shift count, input, expected output) *)
+  let test_rshifts = [
+    (1, "f0000000000000000000000000000000", "78000000000000000000000000000000");
+    (2, "f0000000000000000000000000000000", "3c000000000000000000000000000000");
+    (8, "00000000000000000000000000000100", "00000000000000000000000000000001");
+    (9, "f0000000000000000000000000000000", "00780000000000000000000000000000");
+    (64, "01000000000000000000000000000000", "00000000000000000100000000000000");
+    (127, "80000000000000000000000000000000", "00000000000000000000000000000001");
+  ]
+  in
+  let open Uintb128 in
+  List.iter (fun (bits, input_value, expected_output) ->
+    Alcotest.(check uintb128) (Printf.sprintf "shift right by %i" bits)
+    (of_string_exn expected_output)
+    (shift_right bits (of_string_exn input_value))
+  ) test_rshifts
 
 let test_get_lsbits () =
   Alcotest.(check int) "get 8 lsb" 0xff (Uintb128.get_lsbits 8 0xff);
