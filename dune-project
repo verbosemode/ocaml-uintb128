@@ -1,4 +1,4 @@
-(lang dune 3.0)
+(lang dune 3.5)
 (name uintb128)
 (generate_opam_files true)
 (source (github verbosemode/uintb128))

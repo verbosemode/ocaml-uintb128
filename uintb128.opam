@@ -9,7 +9,7 @@ homepage: "https://github.com/verbosemode/uintb128"
 doc: "https://verbosemode.github.io/uintb128/"
 bug-reports: "https://github.com/verbosemode/uintb128/issues"
 depends: [
-  "dune" {>= "3.0"}
+  "dune" {>= "3.5"}
   "ocaml" {>= "4.08.0"}
   "alcotest" {with-test}
   "mtime" {with-test}
