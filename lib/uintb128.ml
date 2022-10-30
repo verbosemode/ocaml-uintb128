@@ -113,10 +113,15 @@ let lognot x =
   Bytes.iteri (fun i _ -> Bytes.set_uint8 b i (lnot (Bytes.get_uint8 x i))) x;
   b
 
-(* Extract the value, starting form the LSB up to bit position [n] *)
+(* Extract the [n] least significant bits from [x] *)
 let get_lsbits n x =
   if n <= 0 || n > 8 then invalid_arg "out of bounds";
   x land (1 lsl n - 1)
+
+(* Extract the [n] most significant bits from [x] *)
+let get_msbits n x =
+  if n <= 0 || n > 8 then invalid_arg "out of bounds";
+  x land (255 - (255 lsr n))
 
 let set_bit i x =
   assert (i >= 0 && i <= 7);
@@ -125,24 +130,6 @@ let set_bit i x =
 let is_bit_set i x =
   assert (i >= 0 && i <= 7);
   x land (1 lsl i) <> 0
-
-(* Set value [x] in [y]'s [n] MSB bits
-
-   TODO bounds checking to ensure values stay
-   within 0x00 - 0xff
-
-   x <- 0b0000_0111
-   n <- 3
-   y <- 0b0000_1001
-
-   ->   0b1110_1001
-          ^^^
-*)
-let set_msbits n x y =
-  if n < 0 || n > 8 then raise (Invalid_argument "n must be >= 0 && <= 8")
-  else if n = 0 then y
-  else if n = 8 then x
-  else (x lsl (8 - n)) lor y
 
 (* Returns a tuple of how many bytes and how many subsequent
    bits after that need to be shifted.
@@ -153,6 +140,7 @@ let get_bitshift_counts n =
   assert (n >= 0 && n <= 128);
   if n = 0 then (0, 0) else (n / 8, n mod 8)
 
+(* TODO DRY for shift functions *)
 let shift_right n x =
   match n with
   | 0 -> x
@@ -171,10 +159,33 @@ let shift_right n x =
           let x' = Bytes.get_uint8 x i in
           let new_carry = get_lsbits shift_bits x' in
           let shifted_value = x' lsr shift_bits in
-          let new_value =
-            shifted_value lor set_msbits shift_bits !carry shifted_value
-          in
+          let new_value = shifted_value lor !carry in
           Bytes.set_uint8 b (i + shift_bytes) new_value;
+          carry := new_carry
+        done);
+      b
+  | _ -> raise (Invalid_argument "n must be >= 0 && <= 128")
+
+let shift_left n x =
+  match n with
+  | 0 -> x
+  | 128 -> zero ()
+  | n when n > 0 && n < 128 ->
+      let b = zero () in
+      let shift_bytes, shift_bits = get_bitshift_counts n in
+      (if shift_bits = 0 then
+       for i = 15 downto 0 + shift_bytes do
+         let x' = Bytes.get_uint8 x i in
+         Bytes.set_uint8 b (i - shift_bytes) x'
+       done
+      else
+        let carry = ref 0 in
+        for i = 15 downto 0 + shift_bytes do
+          let x' = Bytes.get_uint8 x i in
+          let new_carry = get_msbits shift_bits x' in
+          let shifted_value = x' lsl shift_bits in
+          let new_value = shifted_value lor !carry in
+          Bytes.set_uint8 b (i - shift_bytes) new_value;
           carry := new_carry
         done);
       b

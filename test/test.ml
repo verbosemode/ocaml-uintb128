@@ -68,6 +68,28 @@ let test_shift_right () =
     (shift_right bits (of_string_exn input_value))
   ) test_rshifts
 
+let test_shift_left () =
+  (* (bit shift count, input, expected output) *)
+  let test_lshifts = [
+    (1, "f0000000000000000000000000000000", "e0000000000000000000000000000000");
+    (1, "0000000000000000000000000000000f", "0000000000000000000000000000001e");
+    (1, "00000000000000000000000000000001", "00000000000000000000000000000002");
+    (2, "f0000000000000000000000000000000", "c0000000000000000000000000000000");
+    (8, "00000000000000000000000000000100", "00000000000000000000000000010000");
+    (9, "f0000000000000000000000000000000", "00000000000000000000000000000000");
+    (64, "00000000000000000000000000000001", "00000000000000010000000000000000");
+    (127, "00000000000000000000000000000001", "80000000000000000000000000000000");
+    (128, "00000000000000000000000000000001", "00000000000000000000000000000000");
+  ]
+  in
+  let open Uintb128 in
+  List.iter (fun (bits, input_value, expected_output) ->
+    Alcotest.(check uintb128) (Printf.sprintf "shift left by %i" bits)
+    (of_string_exn expected_output)
+    (shift_left bits (of_string_exn input_value))
+  ) test_lshifts
+
+
 let test_get_lsbits () =
   Alcotest.(check int) "get 8 lsb" 0xff (Uintb128.get_lsbits 8 0xff);
   Alcotest.(check int) "get 4 lsb" 0x0f (Uintb128.get_lsbits 4 0xff);
@@ -99,6 +121,7 @@ let () =
         [
           test_case "lognot inverts bits" `Quick test_lognot;
           test_case "logical shift right" `Quick test_shift_right;
+          test_case "logical shift left" `Quick test_shift_left;
         ] );
       ( "auxiliary functions",
         [ test_case "get least significant bits" `Quick test_get_lsbits ] );
