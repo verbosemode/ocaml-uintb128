@@ -131,6 +131,24 @@ let is_bit_set i x =
   assert (i >= 0 && i <= 7);
   x land (1 lsl i) <> 0
 
+(* Set value [x] in [y]'s [n] MSB bits
+
+   TODO bounds checking to ensure values stay
+   within 0x00 - 0xff
+
+   x <- 0b0000_0111
+   n <- 3
+   y <- 0b0000_1001
+
+   ->   0b1110_1001
+          ^^^
+*)
+let set_msbits n x y =
+  if n < 0 || n > 8 then raise (Invalid_argument "n must be >= 0 && <= 8")
+  else if n = 0 then y
+  else if n = 8 then x
+  else (x lsl (8 - n)) lor y
+
 (* Returns a tuple of how many bytes and how many subsequent
    bits after that need to be shifted.
 
@@ -159,7 +177,7 @@ let shift_right n x =
           let x' = Bytes.get_uint8 x i in
           let new_carry = get_lsbits shift_bits x' in
           let shifted_value = x' lsr shift_bits in
-          let new_value = shifted_value lor !carry in
+          let new_value = set_msbits shift_bits !carry shifted_value in
           Bytes.set_uint8 b (i + shift_bytes) new_value;
           carry := new_carry
         done);
