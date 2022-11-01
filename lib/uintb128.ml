@@ -121,7 +121,7 @@ let get_lsbits n x =
 (* Extract the [n] most significant bits from [x] *)
 let get_msbits n x =
   if n <= 0 || n > 8 then invalid_arg "out of bounds";
-  x land (255 - (255 lsr n))
+  (x land (255 lsl (8 - n))) lsr (8 - n)
 
 let set_bit i x =
   assert (i >= 0 && i <= 7);
