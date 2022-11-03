@@ -19,14 +19,12 @@ let int_of_hex_char c =
   | 'A' .. 'F' -> Char.code c - 55
   | _ -> invalid_arg "char is not a valid hex digit"
 
-(* TODO use Bytes.copy to make it thread safe? *)
-let foldi_right2 f a x y =
+let iteri_right2 f x y =
   for i = 15 downto 0 do
     let x' = Bytes.get_uint8 x i in
     let y' = Bytes.get_uint8 y i in
-    f i a x' y'
-  done;
-  a
+    f i x' y'
+  done
 
 (* TODO allow strings shorter than 32 characters. add 0 from left for padding. *)
 let of_string_exn s =
@@ -62,51 +60,55 @@ let to_string b =
 let pp ppf t = Format.fprintf ppf "uintb128 = %s" (to_string t)
 
 let add_exn x y =
-  let a, carry =
-    foldi_right2
-      (fun i (a, carry) x' y' ->
-        let sum = x' + y' + !carry in
-        if sum >= 256 then (
-          carry := 1;
-          Bytes.set_uint8 a i (sum - 256))
-        else (
-          carry := 0;
-          Bytes.set_uint8 a i sum))
-      (zero (), ref 0)
-      x y
-  in
-  if !carry <> 0 then raise Overflow else a
+  let b = zero () in
+  let carry = ref 0 in
+  iteri_right2
+    (fun i x' y' ->
+      let sum = x' + y' + !carry in
+      if sum >= 256 then (
+        carry := 1;
+        Bytes.set_uint8 b i (sum - 256))
+      else (
+        carry := 0;
+        Bytes.set_uint8 b i sum))
+  x y;
+  if !carry <> 0 then raise Overflow else b
 
 let add x y = try Some (add_exn x y) with Overflow -> None
 
 let sub_exn x y =
   if Bytes.compare x y = -1 then invalid_arg "y is larger than x"
   else
-    let a, carry =
-      foldi_right2
-        (fun i (a, carry) x' y' ->
+    let b = zero () in
+    let carry = ref 0 in
+      iteri_right2
+        (fun i x' y' ->
           if x' < y' then (
-            Bytes.set_uint8 a i (256 + x' - y' - !carry);
+            Bytes.set_uint8 b i (256 + x' - y' - !carry);
             carry := 1)
           else (
-            Bytes.set_uint8 a i (x' - y' - !carry);
+            Bytes.set_uint8 b i (x' - y' - !carry);
             carry := 0))
-        (zero (), ref 0)
-        x y
-    in
-    if !carry <> 0 then raise Overflow else a
+    x y;
+    if !carry <> 0 then raise Overflow else b
 
 let sub x y =
   try Some (sub_exn x y) with Overflow -> None | Invalid_argument _ -> None
 
 let logand x y =
-  foldi_right2 (fun i a x y -> Bytes.set_uint8 a i (x land y)) (zero ()) x y
+  let b = zero () in
+  iteri_right2 (fun i x y -> Bytes.set_uint8 b i (x land y)) x y;
+  b
 
 let logor x y =
-  foldi_right2 (fun i a x y -> Bytes.set_uint8 a i (x lor y)) (zero ()) x y
+  let b = zero () in
+  iteri_right2 (fun i x y -> Bytes.set_uint8 b i (x lor y)) x y;
+  b
 
 let logxor x y =
-  foldi_right2 (fun i a x y -> Bytes.set_uint8 a i (x lxor y)) (zero ()) x y
+  let b = zero () in
+  iteri_right2 (fun i x y -> Bytes.set_uint8 b i (x lxor y)) x y;
+  b
 
 let lognot x =
   let b = zero () in
@@ -131,18 +133,7 @@ let is_bit_set i x =
   assert (i >= 0 && i <= 7);
   x land (1 lsl i) <> 0
 
-(* Set value [x] in [y]'s [n] MSB bits
-
-   TODO bounds checking to ensure values stay
-   within 0x00 - 0xff
-
-   x <- 0b0000_0111
-   n <- 3
-   y <- 0b0000_1001
-
-   ->   0b1110_1001
-          ^^^
-*)
+(* Set value [x] in [y]'s [n] MSB bits *)
 let set_msbits n x y =
   if n < 0 || n > 8 then raise (Invalid_argument "n must be >= 0 && <= 8")
   else if n = 0 then y
@@ -158,7 +149,6 @@ let get_bitshift_counts n =
   assert (n >= 0 && n <= 128);
   if n = 0 then (0, 0) else (n / 8, n mod 8)
 
-(* TODO DRY for shift functions *)
 let shift_right n x =
   match n with
   | 0 -> x

@@ -8,8 +8,8 @@
 (documentation "https://verbosemode.github.io/uintb128/")
 (package
  (name uintb128)
- (synopsis "unsigned Bytes.t based 128 bit integer library")
- (description "unsigned Bytes.t based 128 bit integer library")
+ (synopsis "Unsigned Bytes.t based 128 bit integer library")
+ (description "Unsigned Bytes.t based 128 bit integer library")
  (depends
   (ocaml (>= 4.08.0))
   (alcotest :with-test)
