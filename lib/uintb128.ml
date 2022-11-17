@@ -71,7 +71,7 @@ let add_exn x y =
       else (
         carry := 0;
         Bytes.set_uint8 b i sum))
-  x y;
+    x y;
   if !carry <> 0 then raise Overflow else b
 
 let add x y = try Some (add_exn x y) with Overflow -> None
@@ -81,15 +81,15 @@ let sub_exn x y =
   else
     let b = zero () in
     let carry = ref 0 in
-      iteri_right2
-        (fun i x' y' ->
-          if x' < y' then (
-            Bytes.set_uint8 b i (256 + x' - y' - !carry);
-            carry := 1)
-          else (
-            Bytes.set_uint8 b i (x' - y' - !carry);
-            carry := 0))
-    x y;
+    iteri_right2
+      (fun i x' y' ->
+        if x' < y' then (
+          Bytes.set_uint8 b i (256 + x' - y' - !carry);
+          carry := 1)
+        else (
+          Bytes.set_uint8 b i (x' - y' - !carry);
+          carry := 0))
+      x y;
     if !carry <> 0 then raise Overflow else b
 
 let sub x y =
@@ -118,7 +118,7 @@ let lognot x =
 (* Extract the [n] least significant bits from [x] *)
 let get_lsbits n x =
   if n <= 0 || n > 8 then invalid_arg "out of bounds";
-  x land (1 lsl n - 1)
+  x land ((1 lsl n) - 1)
 
 (* Extract the [n] most significant bits from [x] *)
 let get_msbits n x =
@@ -200,7 +200,7 @@ let shift_left n x =
   | _ -> raise (Invalid_argument "n must be >= 0 && <= 128")
 
 let of_int64 (a, b) =
-  let b'= zero () in
+  let b' = zero () in
   Bytes.set_int64_be b' 0 a;
   Bytes.set_int64_be b' 8 b;
   b'
@@ -208,7 +208,7 @@ let of_int64 (a, b) =
 let to_int64 b = (Bytes.get_int64_be b 0, Bytes.get_int64_be b 8)
 
 let of_int32 (a, b, c, d) =
-  let b'= zero () in
+  let b' = zero () in
   Bytes.set_int32_be b' 0 a;
   Bytes.set_int32_be b' 4 b;
   Bytes.set_int32_be b' 8 c;
@@ -216,13 +216,13 @@ let of_int32 (a, b, c, d) =
   b'
 
 let to_int32 b =
-  (Bytes.get_int32_be b 0,
-  Bytes.get_int32_be b 4,
-  Bytes.get_int32_be b 8,
-  Bytes.get_int32_be b 12)
+  ( Bytes.get_int32_be b 0,
+    Bytes.get_int32_be b 4,
+    Bytes.get_int32_be b 8,
+    Bytes.get_int32_be b 12 )
 
 let of_int16 (a, b, c, d, e, f, g, h) =
-  let b'= zero () in
+  let b' = zero () in
   Bytes.set_uint16_be b' 0 a;
   Bytes.set_uint16_be b' 2 b;
   Bytes.set_uint16_be b' 4 c;
@@ -234,11 +234,11 @@ let of_int16 (a, b, c, d, e, f, g, h) =
   b'
 
 let to_int16 b =
-  (Bytes.get_uint16_be b 0,
-  Bytes.get_uint16_be b 2,
-  Bytes.get_uint16_be b 4,
-  Bytes.get_uint16_be b 6,
-  Bytes.get_uint16_be b 8,
-  Bytes.get_uint16_be b 10,
-  Bytes.get_uint16_be b 12,
-  Bytes.get_uint16_be b 14)
+  ( Bytes.get_uint16_be b 0,
+    Bytes.get_uint16_be b 2,
+    Bytes.get_uint16_be b 4,
+    Bytes.get_uint16_be b 6,
+    Bytes.get_uint16_be b 8,
+    Bytes.get_uint16_be b 10,
+    Bytes.get_uint16_be b 12,
+    Bytes.get_uint16_be b 14 )
