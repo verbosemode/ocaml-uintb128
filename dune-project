@@ -13,5 +13,4 @@
  (depends
   (ocaml (>= 4.08.0))
   (alcotest :with-test)
-  (mtime :with-test)
   (odoc :with-doc)))

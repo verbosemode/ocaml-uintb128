@@ -12,7 +12,6 @@ depends: [
   "dune" {>= "3.5"}
   "ocaml" {>= "4.08.0"}
   "alcotest" {with-test}
-  "mtime" {with-test}
   "odoc" {with-doc}
 ]
 build: [
