@@ -19,6 +19,14 @@ let int_of_hex_char c =
   | 'A' .. 'F' -> Char.code c - 55
   | _ -> invalid_arg "char is not a valid hex digit"
 
+let fold_left f a x =
+  let a' = ref a in
+  for i = 0 to 15 do
+    let x' = Bytes.get_uint8 x i in
+    a' := f !a' x'
+  done;
+  !a'
+
 let iteri_right2 f x y =
   for i = 15 downto 0 do
     let x' = Bytes.get_uint8 x i in
