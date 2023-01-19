@@ -148,6 +148,24 @@ let set_msbits n x y =
   else if n = 8 then x
   else (x lsl (8 - n)) lor y
 
+(* set bits are represented as bool/true *)
+let fold_left_byte (f : ('a -> bool -> 'a)) (a : 'a) (b : int) =
+  let bitmask = ref 0b1000_0000 in
+  let a' = ref a in
+  for i = 0 to 7 do
+    a' := f !a' (b land !bitmask > 0);
+    bitmask := (!bitmask lsr 1)
+  done;
+  !a'
+
+(* Just for comparison *)
+let fold_left_byte_rec (f : ('a -> bool -> 'a)) (a : 'a) (b : int) =
+  let rec aux a i bitmask =
+    if i = 8 then a else
+    aux (f a (b land bitmask > 0)) (i + 1) (bitmask lsr 1) 
+  in
+  aux a 0 0b1000_0000
+
 (* Returns a tuple of how many bytes and how many subsequent
    bits after that need to be shifted.
 
