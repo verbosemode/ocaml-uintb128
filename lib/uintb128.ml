@@ -34,20 +34,23 @@ let iteri_right2 f x y =
     f i x' y'
   done
 
-(* TODO allow strings shorter than 32 characters. add 0 from left for padding. *)
+(* FIXME string length 3 for example
+   - add 1 to uneven length??
+
+ *)
 let of_string_exn s =
-  if String.length s <> 32 && String.for_all is_hex_char s then
-    invalid_arg "not 32 chars long or invalid hex chars"
+  let l = String.length s in
+  if l > 32 then invalid_arg "not 32 chars long"
   else
     let b = zero () in
-    let i = ref 31 in
-    let j = ref 15 in
+    let bi = ref 15 in
+    let i = ref (l - 1) in
     while !i >= 0 do
       let x = int_of_hex_char (String.get s !i) in
       let y = int_of_hex_char (String.get s (!i - 1)) in
-      Bytes.set_uint8 b !j ((y lsl 4) + x);
+      Bytes.set_uint8 b !bi ((y lsl 4) + x);
       i := !i - 2;
-      j := !j - 1
+      bi := !bi - 1
     done;
     b
 
