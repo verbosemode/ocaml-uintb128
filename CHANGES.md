@@ -1,3 +1,4 @@
-## v0.0.1 (2022-09-29)
+## v0.0.1 (2023-04-10)
 
-* Initial release
+* this library is still unreleased
+* code made its way into ipaddr
